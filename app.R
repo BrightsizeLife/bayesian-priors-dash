@@ -8,6 +8,8 @@ source("R/summaries.R")
 source("R/simulation.R")
 source("R/plots.R")
 source("R/modules.R")
+source("R/prior_strength.R")
+source("R/help_ui.R")
 
 app_theme <- bs_theme(
   version = 5,
@@ -26,7 +28,8 @@ ui <- page_navbar(
   nav_panel("Poisson", analysisModuleUI("poisson", "poisson")),
   nav_panel("Gamma", analysisModuleUI("gamma", "gamma")),
   nav_panel("NegBin", analysisModuleUI("negbin", "negbin")),
-  nav_panel("Multilevel", analysisModuleUI("multilevel", "multilevel"))
+  nav_panel("Multilevel", analysisModuleUI("multilevel", "multilevel")),
+  nav_panel("Help", helpTabUI())
 )
 
 server <- function(input, output, session) {

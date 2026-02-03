@@ -61,6 +61,47 @@ body {
   margin-bottom: 1rem;
 }
 
+.help-text {
+  color: #cbd5e1;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+.help-params {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.help-param {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+}
+
+.help-param-name {
+  color: #e6e8f0;
+  font-weight: 600;
+  min-width: 90px;
+}
+
+.help-param-desc {
+  color: #b6c0d2;
+  font-size: 0.82rem;
+}
+
+.help-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  padding: 0.5rem 0.25rem;
+}
+
+.help-card .card-header {
+  font-size: 0.95rem;
+}
+
 .form-control,
 .selectize-control .selectize-input {
   background-color: #0f1117;

@@ -12,7 +12,7 @@ PRIOR_TEMPLATES <- list(
       ),
       beta = list(
         label = "Slope(s)",
-        allowed = c("normal", "student_t", "cauchy", "flat"),
+        allowed = c("normal", "student_t", "cauchy", "laplace", "horseshoe", "flat"),
         default = list(dist = "normal", params = list(mu = 0, sigma = 1))
       ),
       sigma = list(
@@ -33,7 +33,7 @@ PRIOR_TEMPLATES <- list(
       ),
       beta = list(
         label = "Slope(s)",
-        allowed = c("normal", "student_t", "cauchy", "flat"),
+        allowed = c("normal", "student_t", "cauchy", "laplace", "horseshoe", "flat"),
         default = list(dist = "normal", params = list(mu = 0, sigma = 2.5))
       )
     ),
@@ -49,7 +49,7 @@ PRIOR_TEMPLATES <- list(
       ),
       beta = list(
         label = "Slope(s)",
-        allowed = c("normal", "student_t", "cauchy", "flat"),
+        allowed = c("normal", "student_t", "cauchy", "laplace", "horseshoe", "flat"),
         default = list(dist = "normal", params = list(mu = 0, sigma = 1))
       )
     ),
@@ -65,7 +65,7 @@ PRIOR_TEMPLATES <- list(
       ),
       beta = list(
         label = "Slope(s)",
-        allowed = c("normal", "student_t", "cauchy", "flat"),
+        allowed = c("normal", "student_t", "cauchy", "laplace", "horseshoe", "flat"),
         default = list(dist = "normal", params = list(mu = 0, sigma = 1))
       ),
       shape = list(
@@ -86,7 +86,7 @@ PRIOR_TEMPLATES <- list(
       ),
       beta = list(
         label = "Slope(s)",
-        allowed = c("normal", "student_t", "cauchy", "flat"),
+        allowed = c("normal", "student_t", "cauchy", "laplace", "horseshoe", "flat"),
         default = list(dist = "normal", params = list(mu = 0, sigma = 1))
       ),
       shape = list(
@@ -107,7 +107,7 @@ PRIOR_TEMPLATES <- list(
       ),
       beta = list(
         label = "Slope(s)",
-        allowed = c("normal", "student_t", "cauchy", "flat"),
+        allowed = c("normal", "student_t", "cauchy", "laplace", "horseshoe", "flat"),
         default = list(dist = "normal", params = list(mu = 0, sigma = 1))
       ),
       sigma = list(
