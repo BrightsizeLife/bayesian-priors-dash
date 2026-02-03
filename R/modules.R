@@ -25,21 +25,27 @@ analysisModuleUI <- function(id, analysis_key) {
 
   settings <- template$settings
 
-    sidebar_controls <- tagList(
-      div(class = "sidebar-title", template$title),
-      selectInput(
-        ns("preset"),
-        "Preset",
-        choices = c(
-          "Custom" = "custom",
-          "brms 2.22.0 defaults" = "brms",
-          "rstanarm (placeholder)" = "rstanarm"
-        ),
-        selected = "custom"
+  sidebar_controls <- tagList(
+    div(class = "sidebar-title", template$title),
+    selectInput(
+      ns("preset"),
+      "Preset",
+      choices = c(
+        "Custom" = "custom",
+        "brms 2.22.0 defaults" = "brms",
+        "rstanarm (placeholder)" = "rstanarm"
       ),
-      uiOutput(ns("preset_note")),
-      uiOutput(ns("flat_warning")),
+      selected = "custom"
+    ),
+    uiOutput(ns("preset_note")),
+    uiOutput(ns("flat_warning")),
     param_cards,
+    bslib::card(
+      class = "soft-card",
+      bslib::card_header("Run"),
+      actionButton(ns("run_sim"), "Run simulations", class = "run-button"),
+      div(class = "muted-note", "Updates only when you press run.")
+    ),
     if (is_glm) {
       bslib::card(
         class = "soft-card",
@@ -175,19 +181,7 @@ analysisModuleServer <- function(id, analysis_key) {
       }
     }, ignoreInit = TRUE)
 
-    settings <- reactive({
-      defaults <- template$settings
-      list(
-        n_sims = safe_value(input$n_sims, defaults$n_sims),
-        n_points = safe_value(input$n_points, defaults$n_points),
-        x_min = safe_value(input$x_min, defaults$x_min),
-        x_max = safe_value(input$x_max, defaults$x_max),
-        seed = safe_value(input$seed, 123),
-        n_groups = if (analysis_key == "multilevel") safe_value(input$n_groups, defaults$n_groups) else NULL
-      )
-    })
-
-    prior_state <- reactive({
+    prior_state_live <- reactive({
       params <- list()
       for (param_name in names(template$parameters)) {
         dist_id <- paste0(param_name, "_dist")
@@ -207,7 +201,7 @@ analysisModuleServer <- function(id, analysis_key) {
     })
 
     output$flat_warning <- renderUI({
-      has_flat <- any(vapply(prior_state(), function(spec) spec$dist == "flat", logical(1)))
+      has_flat <- any(vapply(prior_state_live(), function(spec) spec$dist == "flat", logical(1)))
       if (!has_flat) {
         return(NULL)
       }
@@ -233,6 +227,24 @@ analysisModuleServer <- function(id, analysis_key) {
       NULL
     })
 
+    applied_inputs <- eventReactive(input$run_sim, {
+      defaults <- template$settings
+      list(
+        settings = list(
+          n_sims = safe_value(input$n_sims, defaults$n_sims),
+          n_points = safe_value(input$n_points, defaults$n_points),
+          x_min = safe_value(input$x_min, defaults$x_min),
+          x_max = safe_value(input$x_max, defaults$x_max),
+          seed = safe_value(input$seed, 123),
+          n_groups = if (analysis_key == "multilevel") safe_value(input$n_groups, defaults$n_groups) else NULL
+        ),
+        prior_state = prior_state_live(),
+        hdi_mass = safe_value(input$hdi_mass, 0.9),
+        n_draws = safe_value(input$n_draws, 5000),
+        glm_scale = if (is_glm) safe_value(input$glm_scale, "linear") else "linear"
+      )
+    }, ignoreInit = FALSE)
+
     output$glm_note <- renderUI({
       if (!is_glm) {
         return(NULL)
@@ -251,10 +263,9 @@ analysisModuleServer <- function(id, analysis_key) {
     })
 
     prior_draws <- reactive({
-      seed <- safe_value(input$seed, 123)
-      n_draws <- safe_value(input$n_draws, 5000)
-      set.seed(seed)
-      sample_prior_draws(prior_state(), n = n_draws)
+      applied <- applied_inputs()
+      set.seed(applied$settings$seed)
+      sample_prior_draws(applied$prior_state, n = applied$n_draws)
     })
 
     transformed_draws <- reactive({
@@ -262,7 +273,7 @@ analysisModuleServer <- function(id, analysis_key) {
       if (!is_glm) {
         return(draws)
       }
-      scale <- safe_value(input$glm_scale, "linear")
+      scale <- applied_inputs()$glm_scale
       if (scale != "exp") {
         return(draws)
       }
@@ -278,14 +289,14 @@ analysisModuleServer <- function(id, analysis_key) {
     })
 
     summary_table <- reactive({
-      hdi_mass <- safe_value(input$hdi_mass, 0.9)
+      hdi_mass <- applied_inputs()$hdi_mass
       summarize_draws(transformed_draws(), hdi_mass = hdi_mass)
     })
 
     implied_data <- reactive({
-      seed <- safe_value(input$seed, 123)
-      set.seed(seed)
-      simulate_analysis(analysis_key, prior_state(), settings())
+      applied <- applied_inputs()
+      set.seed(applied$settings$seed)
+      simulate_analysis(analysis_key, applied$prior_state, applied$settings)
     })
 
     output$implied_plot <- renderPlot({
@@ -300,8 +311,30 @@ analysisModuleServer <- function(id, analysis_key) {
       plot_prior_density(df)
     })
 
+    format_number <- function(x) {
+      if (is.na(x)) {
+        return(NA_character_)
+      }
+      if (x == 0) {
+        return("0")
+      }
+      if (abs(x) >= 1e6 || abs(x) < 1e-4) {
+        return(formatC(x, format = "e", digits = 2))
+      }
+      formatC(x, format = "f", digits = 3)
+    }
+
+    format_summary_table <- function(df) {
+      out <- df
+      numeric_cols <- vapply(out, is.numeric, logical(1))
+      for (col in names(out)[numeric_cols]) {
+        out[[col]] <- vapply(out[[col]], format_number, character(1))
+      }
+      out
+    }
+
     output$summary_table <- renderTable({
-      summary_table()
-    }, digits = 3)
+      format_summary_table(summary_table())
+    }, sanitize.text.function = identity)
   })
 }
