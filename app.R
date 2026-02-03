@@ -8,6 +8,7 @@ source("R/summaries.R")
 source("R/simulation.R")
 source("R/plots.R")
 source("R/modules.R")
+source("R/prior_strength.R")
 
 app_theme <- bs_theme(
   version = 5,
