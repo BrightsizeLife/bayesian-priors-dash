@@ -19,6 +19,22 @@ body {
   margin-bottom: 1rem;
 }
 
+.run-button {
+  background-color: #7dd3fc;
+  border-color: #7dd3fc;
+  color: #0f1117;
+  font-weight: 600;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.run-button:hover,
+.run-button:focus {
+  background-color: #5bc6f7;
+  border-color: #5bc6f7;
+  color: #0f1117;
+}
+
 .soft-card .card-header {
   background-color: #141824;
   border-bottom: 1px solid #293041;

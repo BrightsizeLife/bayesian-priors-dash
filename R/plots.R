@@ -31,32 +31,19 @@ plot_implied <- function(analysis_key, data) {
 }
 
 plot_prior_density <- function(draws_df) {
-  palette <- c(
-    "#7dd3fc",
-    "#fca5a5",
-    "#fdba74",
-    "#c4b5fd",
-    "#5eead4",
-    "#f0abfc"
-  )
-  params <- unique(draws_df$parameter)
-  pal <- setNames(rep(palette, length.out = length(params)), params)
-
-  ggplot(draws_df, aes(x = value, color = parameter, fill = parameter)) +
-    geom_density(alpha = 0.18, linewidth = 0.6) +
+  ggplot(draws_df, aes(x = value)) +
+    geom_density(color = "#7dd3fc", fill = "#7dd3fc", alpha = 0.2, linewidth = 0.6) +
+    facet_wrap(~ parameter, scales = "free") +
     labs(x = "Value", y = "Density") +
-    scale_color_manual(values = pal) +
-    scale_fill_manual(values = pal) +
     theme_minimal(base_size = 12) +
     theme(
       panel.background = element_rect(fill = "#141824", color = NA),
       plot.background = element_rect(fill = "#141824", color = NA),
       panel.grid.minor = element_blank(),
       panel.grid.major = element_line(color = "#2a3140"),
-      legend.position = "bottom",
       axis.text = element_text(color = "#cbd5e1"),
       axis.title = element_text(color = "#e6e8f0"),
-      legend.text = element_text(color = "#cbd5e1"),
-      legend.title = element_blank()
+      strip.background = element_rect(fill = "#1a2030", color = "#293041"),
+      strip.text = element_text(color = "#e6e8f0")
     )
 }
