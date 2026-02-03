@@ -1,0 +1,88 @@
+body {
+  background-color: #0f1117;
+}
+
+.sidebar-panel {
+  background-color: #0f1117;
+  border-right: 1px solid #1f2533;
+  padding-right: 0.75rem;
+}
+
+.main-panel {
+  padding-left: 0.25rem;
+}
+
+.soft-card {
+  background-color: #141824;
+  border: 1px solid #293041;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  margin-bottom: 1rem;
+}
+
+.soft-card .card-header {
+  background-color: #141824;
+  border-bottom: 1px solid #293041;
+  color: #e6e8f0;
+  font-weight: 600;
+}
+
+.sidebar-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #e6e8f0;
+  margin-bottom: 0.5rem;
+}
+
+.muted-note {
+  color: #a4adbd;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.warning-note {
+  color: #f8d477;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.form-control,
+.selectize-control .selectize-input {
+  background-color: #0f1117;
+  color: #e6e8f0;
+  border: 1px solid #2f374a;
+}
+
+.form-control:focus,
+.selectize-control .selectize-input.focus {
+  border-color: #7dd3fc;
+  box-shadow: 0 0 0 0.2rem rgba(125, 211, 252, 0.25);
+}
+
+.table {
+  color: #e6e8f0;
+  background-color: #141824;
+}
+
+.table thead th {
+  border-bottom: 1px solid #293041;
+}
+
+.table td,
+.table th {
+  border-top: 1px solid #293041;
+}
+
+.navbar {
+  background-color: #0f1117;
+  border-bottom: 1px solid #1f2533;
+}
+
+.navbar a {
+  color: #e6e8f0;
+}
+
+.navbar .active > a,
+.navbar .nav-link.active {
+  color: #7dd3fc;
+  border-bottom: 2px solid #7dd3fc;
+}

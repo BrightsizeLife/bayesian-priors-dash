@@ -1,0 +1,251 @@
+# Shiny modules for each analysis tab
+
+analysisModuleUI <- function(id, analysis_key) {
+  template <- PRIOR_TEMPLATES[[analysis_key]]
+  ns <- NS(id)
+
+  param_cards <- lapply(names(template$parameters), function(param_name) {
+    param <- template$parameters[[param_name]]
+    dist_id <- paste0(param_name, "_dist")
+    params_ui_id <- paste0(param_name, "_params")
+
+    bslib::card(
+      class = "soft-card",
+      bslib::card_header(param$label),
+      selectInput(
+        ns(dist_id),
+        "Distribution",
+        choices = get_dist_choices(param$allowed),
+        selected = param$default$dist
+      ),
+      uiOutput(ns(params_ui_id))
+    )
+  })
+
+  settings <- template$settings
+
+    sidebar_controls <- tagList(
+      div(class = "sidebar-title", template$title),
+      selectInput(
+        ns("preset"),
+        "Preset",
+        choices = c(
+          "Custom" = "custom",
+          "brms 2.22.0 defaults" = "brms",
+          "rstanarm (placeholder)" = "rstanarm"
+        ),
+        selected = "custom"
+      ),
+      uiOutput(ns("preset_note")),
+      uiOutput(ns("flat_warning")),
+      param_cards,
+    bslib::card(
+      class = "soft-card",
+      bslib::card_header("Simulation"),
+      numericInput(ns("n_sims"), "Simulations", settings$n_sims, min = 100, max = 5000, step = 50),
+      numericInput(ns("n_points"), "Points per sim", settings$n_points, min = 20, max = 200, step = 5),
+      numericInput(ns("x_min"), "x min", settings$x_min, step = 0.5),
+      numericInput(ns("x_max"), "x max", settings$x_max, step = 0.5),
+      numericInput(ns("seed"), "Seed", 123, min = 1, step = 1),
+      if (analysis_key == "multilevel") {
+        numericInput(ns("n_groups"), "Groups", settings$n_groups, min = 2, max = 50, step = 1)
+      }
+    ),
+    bslib::card(
+      class = "soft-card",
+      bslib::card_header("Summaries"),
+      numericInput(ns("n_draws"), "Draws", 5000, min = 500, max = 50000, step = 500),
+      numericInput(ns("hdi_mass"), "HDI mass", 0.9, min = 0.5, max = 0.99, step = 0.01)
+    )
+  )
+
+  fluidRow(
+    column(
+      width = 3,
+      div(class = "sidebar-panel", sidebar_controls)
+    ),
+    column(
+      width = 9,
+      div(
+        class = "main-panel",
+        fluidRow(
+          column(
+            width = 6,
+            bslib::card(
+              class = "soft-card",
+              bslib::card_header("Implied data"),
+              plotOutput(ns("implied_plot"), height = 360)
+            )
+          ),
+          column(
+            width = 6,
+            bslib::card(
+              class = "soft-card",
+              bslib::card_header("Parameter priors"),
+              plotOutput(ns("prior_plot"), height = 360)
+            )
+          )
+        ),
+        bslib::card(
+          class = "soft-card",
+          bslib::card_header("Prior summaries"),
+          tableOutput(ns("summary_table"))
+        )
+      )
+    )
+  )
+}
+
+analysisModuleServer <- function(id, analysis_key) {
+  moduleServer(id, function(input, output, session) {
+    template <- PRIOR_TEMPLATES[[analysis_key]]
+    presets <- PRIOR_PRESETS[[analysis_key]]
+
+    safe_value <- function(value, default) {
+      if (is.null(value) || is.na(value)) {
+        return(default)
+      }
+      value
+    }
+
+    # Render parameter-specific numeric inputs based on selected distribution.
+    for (param_name in names(template$parameters)) {
+      local({
+        param <- param_name
+        dist_id <- paste0(param, "_dist")
+        params_ui_id <- paste0(param, "_params")
+
+        output[[params_ui_id]] <- renderUI({
+          dist <- safe_value(input[[dist_id]], template$parameters[[param]]$default$dist)
+          spec <- DIST_SPECS[[dist]]
+          defaults <- resolve_params(dist, template$parameters[[param]]$default$params)
+
+          inputs <- lapply(names(spec$params), function(param_key) {
+            input_id <- paste0(param, "_", param_key)
+            numericInput(
+              inputId = input_id,
+              label = param_key,
+              value = safe_value(input[[input_id]], defaults[[param_key]]),
+              step = 0.1
+            )
+          })
+
+          tagList(inputs)
+        })
+      })
+    }
+
+    # Apply preset defaults when the preset changes.
+    observeEvent(input$preset, {
+      preset <- input$preset
+      if (is.null(preset) || is.null(presets[[preset]])) {
+        return()
+      }
+
+      for (param_name in names(template$parameters)) {
+        preset_spec <- presets[[preset]][[param_name]]
+        dist_id <- paste0(param_name, "_dist")
+        updateSelectInput(session, dist_id, selected = preset_spec$dist)
+
+        spec <- DIST_SPECS[[preset_spec$dist]]
+        defaults <- resolve_params(preset_spec$dist, preset_spec$params)
+        for (param_key in names(spec$params)) {
+          input_id <- paste0(param_name, "_", param_key)
+          updateNumericInput(session, input_id, value = defaults[[param_key]])
+        }
+      }
+    }, ignoreInit = TRUE)
+
+    settings <- reactive({
+      defaults <- template$settings
+      list(
+        n_sims = safe_value(input$n_sims, defaults$n_sims),
+        n_points = safe_value(input$n_points, defaults$n_points),
+        x_min = safe_value(input$x_min, defaults$x_min),
+        x_max = safe_value(input$x_max, defaults$x_max),
+        seed = safe_value(input$seed, 123),
+        n_groups = if (analysis_key == "multilevel") safe_value(input$n_groups, defaults$n_groups) else NULL
+      )
+    })
+
+    prior_state <- reactive({
+      params <- list()
+      for (param_name in names(template$parameters)) {
+        dist_id <- paste0(param_name, "_dist")
+        dist <- safe_value(input[[dist_id]], template$parameters[[param_name]]$default$dist)
+        param_spec <- DIST_SPECS[[dist]]$params
+
+        param_values <- list()
+        for (param_key in names(param_spec)) {
+          input_id <- paste0(param_name, "_", param_key)
+          default_val <- template$parameters[[param_name]]$default$params[[param_key]]
+          param_values[[param_key]] <- safe_value(input[[input_id]], default_val)
+        }
+
+        params[[param_name]] <- list(dist = dist, params = param_values)
+      }
+      params
+    })
+
+    output$flat_warning <- renderUI({
+      has_flat <- any(vapply(prior_state(), function(spec) spec$dist == "flat", logical(1)))
+      if (!has_flat) {
+        return(NULL)
+      }
+      div(
+        class = "warning-note",
+        "Flat priors are improper. For plots and summaries, we approximate them with Normal(0, 1000)."
+      )
+    })
+
+    output$preset_note <- renderUI({
+      if (input$preset == "brms") {
+        return(div(
+          class = "muted-note",
+          "Defaults follow brms 2.22.0 docs. Scale terms use the minimum 2.5 where brms adapts to data."
+        ))
+      }
+      if (input$preset == "rstanarm") {
+        return(div(
+          class = "muted-note",
+          "rstanarm defaults are not wired yet."
+        ))
+      }
+      NULL
+    })
+
+    prior_draws <- reactive({
+      seed <- safe_value(input$seed, 123)
+      n_draws <- safe_value(input$n_draws, 5000)
+      set.seed(seed)
+      sample_prior_draws(prior_state(), n = n_draws)
+    })
+
+    summary_table <- reactive({
+      hdi_mass <- safe_value(input$hdi_mass, 0.9)
+      summarize_draws(prior_draws(), hdi_mass = hdi_mass)
+    })
+
+    implied_data <- reactive({
+      seed <- safe_value(input$seed, 123)
+      set.seed(seed)
+      simulate_analysis(analysis_key, prior_state(), settings())
+    })
+
+    output$implied_plot <- renderPlot({
+      plot_implied(analysis_key, implied_data())
+    })
+
+    output$prior_plot <- renderPlot({
+      draws <- prior_draws()
+      df <- do.call(rbind, lapply(names(draws), function(name) {
+        data.frame(parameter = name, value = draws[[name]], stringsAsFactors = FALSE)
+      }))
+      plot_prior_density(df)
+    })
+
+    output$summary_table <- renderTable({
+      summary_table()
+    }, digits = 3)
+  })
+}
