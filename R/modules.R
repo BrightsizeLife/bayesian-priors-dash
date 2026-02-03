@@ -144,6 +144,7 @@ analysisModuleServer <- function(id, analysis_key) {
           dist <- safe_value(input[[dist_id]], template$parameters[[param]]$default$dist)
           spec <- DIST_SPECS[[dist]]
           defaults <- resolve_params(dist, template$parameters[[param]]$default$params)
+          help <- get_dist_help(dist)
 
           inputs <- lapply(names(spec$params), function(param_key) {
             input_id <- paste0(param, "_", param_key)
@@ -155,7 +156,23 @@ analysisModuleServer <- function(id, analysis_key) {
             )
           })
 
-          tagList(inputs)
+          help_params <- lapply(names(help$params), function(param_key) {
+            div(
+              class = "help-param",
+              span(class = "help-param-name", param_key),
+              span(class = "help-param-desc", help$params[[param_key]])
+            )
+          })
+
+          tagList(
+            inputs,
+            if (!is.null(help$description) && nzchar(help$description)) {
+              div(class = "help-text", help$description)
+            },
+            if (length(help_params) > 0) {
+              div(class = "help-params", help_params)
+            }
+          )
         })
       })
     }
