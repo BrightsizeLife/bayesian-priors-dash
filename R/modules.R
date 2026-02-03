@@ -3,6 +3,7 @@
 analysisModuleUI <- function(id, analysis_key) {
   template <- PRIOR_TEMPLATES[[analysis_key]]
   ns <- NS(id)
+  is_glm <- analysis_key %in% c("logistic", "poisson", "gamma", "negbin")
 
   param_cards <- lapply(names(template$parameters), function(param_name) {
     param <- template$parameters[[param_name]]
@@ -38,7 +39,23 @@ analysisModuleUI <- function(id, analysis_key) {
       ),
       uiOutput(ns("preset_note")),
       uiOutput(ns("flat_warning")),
-      param_cards,
+    param_cards,
+    if (is_glm) {
+      bslib::card(
+        class = "soft-card",
+        bslib::card_header("GLM scale"),
+        selectInput(
+          ns("glm_scale"),
+          "Scale for priors & summaries",
+          choices = c(
+            "Log scale (linear predictor)" = "linear",
+            "Exponentiated (odds/mean ratio)" = "exp"
+          ),
+          selected = "linear"
+        ),
+        uiOutput(ns("glm_note"))
+      )
+    },
     bslib::card(
       class = "soft-card",
       bslib::card_header("Simulation"),
@@ -100,6 +117,8 @@ analysisModuleServer <- function(id, analysis_key) {
   moduleServer(id, function(input, output, session) {
     template <- PRIOR_TEMPLATES[[analysis_key]]
     presets <- PRIOR_PRESETS[[analysis_key]]
+    is_glm <- analysis_key %in% c("logistic", "poisson", "gamma", "negbin")
+    ns <- session$ns
 
     safe_value <- function(value, default) {
       if (is.null(value) || is.na(value)) {
@@ -123,7 +142,7 @@ analysisModuleServer <- function(id, analysis_key) {
           inputs <- lapply(names(spec$params), function(param_key) {
             input_id <- paste0(param, "_", param_key)
             numericInput(
-              inputId = input_id,
+              inputId = ns(input_id),
               label = param_key,
               value = safe_value(input[[input_id]], defaults[[param_key]]),
               step = 0.1
@@ -214,6 +233,23 @@ analysisModuleServer <- function(id, analysis_key) {
       NULL
     })
 
+    output$glm_note <- renderUI({
+      if (!is_glm) {
+        return(NULL)
+      }
+      scale <- safe_value(input$glm_scale, "linear")
+      if (scale == "exp") {
+        return(div(
+          class = "muted-note",
+          "Exponentiated shows multiplicative effects. Intercept becomes baseline odds/mean at x = 0."
+        ))
+      }
+      div(
+        class = "muted-note",
+        "Log scale matches the linear predictor (log-odds or log-mean)."
+      )
+    })
+
     prior_draws <- reactive({
       seed <- safe_value(input$seed, 123)
       n_draws <- safe_value(input$n_draws, 5000)
@@ -221,9 +257,29 @@ analysisModuleServer <- function(id, analysis_key) {
       sample_prior_draws(prior_state(), n = n_draws)
     })
 
+    transformed_draws <- reactive({
+      draws <- prior_draws()
+      if (!is_glm) {
+        return(draws)
+      }
+      scale <- safe_value(input$glm_scale, "linear")
+      if (scale != "exp") {
+        return(draws)
+      }
+      out <- list()
+      for (name in names(draws)) {
+        if (name %in% c("intercept", "beta")) {
+          out[[paste0(name, " (exp)")]] <- exp(draws[[name]])
+        } else {
+          out[[name]] <- draws[[name]]
+        }
+      }
+      out
+    })
+
     summary_table <- reactive({
       hdi_mass <- safe_value(input$hdi_mass, 0.9)
-      summarize_draws(prior_draws(), hdi_mass = hdi_mass)
+      summarize_draws(transformed_draws(), hdi_mass = hdi_mass)
     })
 
     implied_data <- reactive({
@@ -237,7 +293,7 @@ analysisModuleServer <- function(id, analysis_key) {
     })
 
     output$prior_plot <- renderPlot({
-      draws <- prior_draws()
+      draws <- transformed_draws()
       df <- do.call(rbind, lapply(names(draws), function(name) {
         data.frame(parameter = name, value = draws[[name]], stringsAsFactors = FALSE)
       }))
