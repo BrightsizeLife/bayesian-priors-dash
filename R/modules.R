@@ -23,9 +23,10 @@ analysisModuleUI <- function(id, analysis_key) {
   })
 
   settings <- template$settings
+  is_glm <- analysis_key %in% c("logistic", "poisson", "gamma", "negbin")
 
-    sidebar_controls <- tagList(
-      div(class = "sidebar-title", template$title),
+  sidebar_controls <- tagList(
+    div(class = "sidebar-title", template$title),
       selectInput(
         ns("preset"),
         "Preset",
@@ -38,7 +39,26 @@ analysisModuleUI <- function(id, analysis_key) {
       ),
       uiOutput(ns("preset_note")),
       uiOutput(ns("flat_warning")),
-      param_cards,
+    param_cards,
+    if (is_glm) {
+      bslib::card(
+        class = "soft-card",
+        bslib::card_header("GLM scale"),
+        selectInput(
+          ns("glm_scale"),
+          "Scale for priors & summaries",
+          choices = c(
+            "Linear predictor (log-odds/log-rate)" = "linear",
+            "Exponentiated (odds/mean ratio)" = "exp"
+          ),
+          selected = "linear"
+        ),
+        div(
+          class = "muted-note",
+          "Exponentiated shows multiplicative effects; intercept becomes baseline odds/mean at x = 0."
+        )
+      )
+    },
     bslib::card(
       class = "soft-card",
       bslib::card_header("Simulation"),
@@ -56,6 +76,19 @@ analysisModuleUI <- function(id, analysis_key) {
       bslib::card_header("Summaries"),
       numericInput(ns("n_draws"), "Draws", 5000, min = 500, max = 50000, step = 500),
       numericInput(ns("hdi_mass"), "HDI mass", 0.9, min = 0.5, max = 0.99, step = 0.01)
+    ),
+    bslib::card(
+      class = "soft-card",
+      bslib::card_header("Prior plot"),
+      selectInput(
+        ns("prior_view"),
+        "Display",
+        choices = c(
+          "Separate panels (recommended)" = "separate",
+          "Overlay" = "overlay"
+        ),
+        selected = "separate"
+      )
     )
   )
 
@@ -122,13 +155,13 @@ analysisModuleServer <- function(id, analysis_key) {
 
           inputs <- lapply(names(spec$params), function(param_key) {
             input_id <- paste0(param, "_", param_key)
-            numericInput(
-              inputId = input_id,
-              label = param_key,
-              value = safe_value(input[[input_id]], defaults[[param_key]]),
-              step = 0.1
-            )
-          })
+          numericInput(
+            inputId = ns(input_id),
+            label = param_key,
+            value = safe_value(input[[input_id]], defaults[[param_key]]),
+            step = 0.1
+          )
+        })
 
           tagList(inputs)
         })
@@ -221,9 +254,29 @@ analysisModuleServer <- function(id, analysis_key) {
       sample_prior_draws(prior_state(), n = n_draws)
     })
 
+    transformed_draws <- reactive({
+      draws <- prior_draws()
+      if (!is_glm) {
+        return(draws)
+      }
+      scale <- safe_value(input$glm_scale, "linear")
+      if (scale != "exp") {
+        return(draws)
+      }
+      out <- list()
+      for (name in names(draws)) {
+        if (name %in% c("intercept", "beta")) {
+          out[[paste0(name, " (exp)")]] <- exp(draws[[name]])
+        } else {
+          out[[name]] <- draws[[name]]
+        }
+      }
+      out
+    })
+
     summary_table <- reactive({
       hdi_mass <- safe_value(input$hdi_mass, 0.9)
-      summarize_draws(prior_draws(), hdi_mass = hdi_mass)
+      summarize_draws(transformed_draws(), hdi_mass = hdi_mass)
     })
 
     implied_data <- reactive({
@@ -237,11 +290,12 @@ analysisModuleServer <- function(id, analysis_key) {
     })
 
     output$prior_plot <- renderPlot({
-      draws <- prior_draws()
+      draws <- transformed_draws()
       df <- do.call(rbind, lapply(names(draws), function(name) {
         data.frame(parameter = name, value = draws[[name]], stringsAsFactors = FALSE)
       }))
-      plot_prior_density(df)
+      separate <- safe_value(input$prior_view, "separate") == "separate"
+      plot_prior_density(df, separate = separate)
     })
 
     output$summary_table <- renderTable({
