@@ -156,7 +156,29 @@ analysisModuleServer <- function(id, analysis_key) {
             )
           })
 
-          help_params <- lapply(names(help$params), function(param_key) {
+          popover_params <- lapply(names(help$params), function(param_key) {
+            tags$li(
+              span(class = "help-param-name", param_key),
+              span(class = "help-param-desc", help$params[[param_key]])
+            )
+          })
+
+          popover_content <- tagList(
+            div(class = "help-text", help$description),
+            if (length(popover_params) > 0) {
+              tags$ul(class = "help-popover-list", popover_params)
+            }
+          )
+
+          info_popover <- bslib::popover(
+            span(class = "help-icon", "i"),
+            title = spec$label,
+            content = popover_content,
+            placement = "right",
+            trigger = "hover focus"
+          )
+
+          inline_params <- lapply(names(help$params), function(param_key) {
             div(
               class = "help-param",
               span(class = "help-param-name", param_key),
@@ -165,12 +187,13 @@ analysisModuleServer <- function(id, analysis_key) {
           })
 
           tagList(
+            div(class = "help-popover-row", info_popover),
             inputs,
             if (!is.null(help$description) && nzchar(help$description)) {
               div(class = "help-text", help$description)
             },
-            if (length(help_params) > 0) {
-              div(class = "help-params", help_params)
+            if (length(inline_params) > 0) {
+              div(class = "help-params", inline_params)
             }
           )
         })

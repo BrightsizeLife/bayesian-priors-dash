@@ -127,7 +127,7 @@ PRIOR_TEMPLATES <- list(
       ),
       rho = list(
         label = "Group corr (intercept/slope)",
-        allowed = c("uniform", "normal"),
+        allowed = c("uniform", "normal", "lkj_corr"),
         default = list(dist = "uniform", params = list(min = -0.5, max = 0.5))
       )
     ),

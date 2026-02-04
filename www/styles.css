@@ -67,6 +67,43 @@ body {
   margin-top: 0.5rem;
 }
 
+.help-popover-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.35rem;
+}
+
+.help-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background-color: #1f2937;
+  color: #93c5fd;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid #2b3447;
+}
+
+.help-icon:hover,
+.help-icon:focus {
+  background-color: #243042;
+  color: #bfdbfe;
+}
+
+.help-popover-list {
+  margin: 0.4rem 0 0 1rem;
+  padding: 0;
+  list-style: disc;
+}
+
+.help-popover-list li {
+  margin-bottom: 0.2rem;
+}
+
 .help-params {
   margin-top: 0.5rem;
   display: flex;

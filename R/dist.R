@@ -43,6 +43,10 @@ DIST_SPECS <- list(
     label = "Horseshoe",
     params = list(tau = 1, lambda_scale = 1)
   ),
+  lkj_corr = list(
+    label = "LKJ (eta)",
+    params = list(eta = 1)
+  ),
   half_student_t = list(
     label = "Half-Student t",
     params = list(df = 3, sigma = 2.5)
@@ -127,6 +131,12 @@ DIST_HELP <- list(
     params = list(
       tau = "Global shrinkage (smaller = stronger overall shrinkage).",
       lambda_scale = "Scale for local shrinkage (controls how easily large effects escape)."
+    )
+  ),
+  lkj_corr = list(
+    description = "Prior for correlation. eta = 1 is uniform; larger values favor correlations near 0.",
+    params = list(
+      eta = "Shape parameter (higher = stronger pull toward zero correlation)."
     )
   ),
   half_student_t = list(
@@ -227,6 +237,10 @@ draw_dist <- function(dist, params, n) {
   if (dist == "horseshoe") {
     lambda <- abs(stats::rcauchy(n, location = 0, scale = params$lambda_scale))
     return(stats::rnorm(n, mean = 0, sd = params$tau * lambda))
+  }
+  if (dist == "lkj_corr") {
+    u <- stats::rbeta(n, shape1 = params$eta, shape2 = params$eta)
+    return(2 * u - 1)
   }
   if (dist == "half_student_t") {
     return(abs(stats::rt(n, df = params$df) * params$sigma))
