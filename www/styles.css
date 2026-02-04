@@ -67,6 +67,51 @@ body {
   margin-top: 0.5rem;
 }
 
+.help-example {
+  margin-top: 0.4rem;
+  display: flex;
+  gap: 0.35rem;
+  align-items: baseline;
+}
+
+.help-example-label {
+  color: #7dd3fc;
+  font-weight: 600;
+  font-size: 0.82rem;
+}
+
+.help-example-text {
+  color: #cbd5e1;
+  font-size: 0.82rem;
+}
+
+.help-sources {
+  margin-top: 0.5rem;
+}
+
+.help-sources-label {
+  color: #7dd3fc;
+  font-weight: 600;
+  font-size: 0.78rem;
+  margin-bottom: 0.2rem;
+}
+
+.help-sources-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  list-style: disc;
+}
+
+.help-sources-list li {
+  margin-bottom: 0.2rem;
+  font-size: 0.78rem;
+}
+
+.help-sources-list a {
+  color: #cbd5e1;
+}
+
+
 .help-params {
   margin-top: 0.5rem;
   display: flex;

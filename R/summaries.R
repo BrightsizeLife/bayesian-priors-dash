@@ -19,7 +19,7 @@ summarize_draws <- function(draws, hdi_mass = 0.9) {
   rows <- lapply(names(draws), function(name) {
     x <- draws[[name]]
     hdi <- hdi_interval(x, hdi_mass)
-    qs <- stats::quantile(x, probs = c(0.5, 0.8, 0.85, 0.9), names = FALSE)
+    qs <- stats::quantile(x, probs = c(0.1, 0.25, 0.5, 0.75, 0.9), names = FALSE)
     data.frame(
       parameter = name,
       mean = mean(x),
@@ -27,13 +27,13 @@ summarize_draws <- function(draws, hdi_mass = 0.9) {
       mad = stats::mad(x),
       hdi_lower = hdi[["lower"]],
       hdi_upper = hdi[["upper"]],
-      q50 = qs[[1]],
-      q80 = qs[[2]],
-      q85 = qs[[3]],
-      q90 = qs[[4]],
+      p10 = qs[[1]],
+      p25 = qs[[2]],
+      p50 = qs[[3]],
+      p75 = qs[[4]],
+      p90 = qs[[5]],
       stringsAsFactors = FALSE
     )
   })
   do.call(rbind, rows)
 }
-

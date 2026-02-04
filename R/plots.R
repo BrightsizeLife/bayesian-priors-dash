@@ -15,6 +15,10 @@ plot_implied <- function(analysis_key, data) {
 
   if (analysis_key %in% c("logistic", "poisson", "gamma", "negbin")) {
     y_label <- if (analysis_key == "logistic") "Implied probability" else "Implied mean"
+    if (analysis_key %in% c("poisson", "gamma", "negbin")) {
+      y_cap <- stats::quantile(data$y, probs = 0.99, na.rm = TRUE)
+      data$y <- pmin(data$y, y_cap)
+    }
     return(
       ggplot(data, aes(x = x, y = y, group = sim)) +
         geom_line(color = "#7dd3fc", alpha = 0.05) +

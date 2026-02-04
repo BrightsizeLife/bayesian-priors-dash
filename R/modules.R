@@ -1,5 +1,14 @@
 # Shiny modules for each analysis tab
 
+MODEL_PURPOSE <- list(
+  linear = "Continuous outcomes with roughly constant variance. Good for straight-line relationships.",
+  logistic = "Binary outcomes (yes/no). Models probabilities and odds.",
+  poisson = "Counts of events per unit time/space. Assumes mean ≈ variance.",
+  gamma = "Positive, skewed continuous outcomes (e.g., durations, costs).",
+  negbin = "Counts with overdispersion (variance > mean).",
+  multilevel = "Grouped data with shared structure across groups (hierarchical)."
+)
+
 analysisModuleUI <- function(id, analysis_key) {
   template <- PRIOR_TEMPLATES[[analysis_key]]
   ns <- NS(id)
@@ -27,6 +36,11 @@ analysisModuleUI <- function(id, analysis_key) {
 
   sidebar_controls <- tagList(
     div(class = "sidebar-title", template$title),
+    bslib::card(
+      class = "soft-card",
+      bslib::card_header("Model purpose"),
+      div(class = "model-purpose", MODEL_PURPOSE[[analysis_key]])
+    ),
     selectInput(
       ns("preset"),
       "Preset",
@@ -47,16 +61,24 @@ analysisModuleUI <- function(id, analysis_key) {
       div(class = "muted-note", "Updates only when you press run.")
     ),
     if (is_glm) {
+      scale_choices <- if (analysis_key == "logistic") {
+        c(
+          "Log-odds (linear predictor)" = "linear",
+          "Probability / odds ratio" = "exp"
+        )
+      } else {
+        c(
+          "Log scale (linear predictor)" = "linear",
+          "Exponentiated (multiplicative)" = "exp"
+        )
+      }
       bslib::card(
         class = "soft-card",
         bslib::card_header("GLM scale"),
         selectInput(
           ns("glm_scale"),
           "Scale for priors & summaries",
-          choices = c(
-            "Log scale (linear predictor)" = "linear",
-            "Exponentiated (odds/mean ratio)" = "exp"
-          ),
+          choices = scale_choices,
           selected = "linear"
         ),
         uiOutput(ns("glm_note"))
@@ -144,18 +166,35 @@ analysisModuleServer <- function(id, analysis_key) {
           dist <- safe_value(input[[dist_id]], template$parameters[[param]]$default$dist)
           spec <- DIST_SPECS[[dist]]
           defaults <- resolve_params(dist, template$parameters[[param]]$default$params)
+          help <- get_dist_help(dist)
 
           inputs <- lapply(names(spec$params), function(param_key) {
             input_id <- paste0(param, "_", param_key)
             numericInput(
               inputId = ns(input_id),
               label = param_key,
-              value = safe_value(input[[input_id]], defaults[[param_key]]),
+              value = safe_value(isolate(input[[input_id]]), defaults[[param_key]]),
               step = 0.1
             )
           })
 
-          tagList(inputs)
+          inline_params <- lapply(names(help$params), function(param_key) {
+            div(
+              class = "help-param",
+              span(class = "help-param-name", param_key),
+              span(class = "help-param-desc", help$params[[param_key]])
+            )
+          })
+
+          tagList(
+            inputs,
+            if (!is.null(help$description) && nzchar(help$description)) {
+              div(class = "help-text", help$description)
+            },
+            if (length(inline_params) > 0) {
+              div(class = "help-params", inline_params)
+            }
+          )
         })
       })
     }
@@ -250,10 +289,16 @@ analysisModuleServer <- function(id, analysis_key) {
         return(NULL)
       }
       scale <- safe_value(input$glm_scale, "linear")
+      if (scale == "exp" && analysis_key == "logistic") {
+        return(div(
+          class = "muted-note",
+          "Intercept becomes baseline probability at x = 0. Slopes become odds ratios; medians/quantiles are most stable."
+        ))
+      }
       if (scale == "exp") {
         return(div(
           class = "muted-note",
-          "Exponentiated shows multiplicative effects. Intercept becomes baseline odds/mean at x = 0."
+          "Exponentiated shows multiplicative effects. Intercept becomes baseline mean at x = 0."
         ))
       }
       div(
@@ -278,12 +323,23 @@ analysisModuleServer <- function(id, analysis_key) {
         return(draws)
       }
       out <- list()
-      for (name in names(draws)) {
-        if (name %in% c("intercept", "beta")) {
-          out[[paste0(name, " (exp)")]] <- exp(draws[[name]])
-        } else {
-          out[[name]] <- draws[[name]]
+      if (analysis_key == "logistic") {
+        if (!is.null(draws$intercept)) {
+          out[["intercept (prob)"]] <- stats::plogis(draws$intercept)
         }
+        if (!is.null(draws$beta)) {
+          out[["beta (OR)"]] <- exp(draws$beta)
+        }
+      } else {
+        if (!is.null(draws$intercept)) {
+          out[["intercept (exp)"]] <- exp(draws$intercept)
+        }
+        if (!is.null(draws$beta)) {
+          out[["beta (exp)"]] <- exp(draws$beta)
+        }
+      }
+      for (name in setdiff(names(draws), c("intercept", "beta"))) {
+        out[[name]] <- draws[[name]]
       }
       out
     })

@@ -9,7 +9,9 @@ source("R/simulation.R")
 source("R/plots.R")
 source("R/modules.R")
 source("R/prior_strength.R")
+source("R/prior_strength_tab.R")
 source("R/help_ui.R")
+source("R/help_server.R")
 
 app_theme <- bs_theme(
   version = 5,
@@ -29,6 +31,7 @@ ui <- page_navbar(
   nav_panel("Gamma", analysisModuleUI("gamma", "gamma")),
   nav_panel("NegBin", analysisModuleUI("negbin", "negbin")),
   nav_panel("Multilevel", analysisModuleUI("multilevel", "multilevel")),
+  nav_panel("Prior Strength", priorStrengthUI("prior_strength")),
   nav_panel("Help", helpTabUI())
 )
 
@@ -39,6 +42,8 @@ server <- function(input, output, session) {
   analysisModuleServer("gamma", "gamma")
   analysisModuleServer("negbin", "negbin")
   analysisModuleServer("multilevel", "multilevel")
+  priorStrengthServer("prior_strength")
+  helpTabServer(output, session)
 }
 
 shinyApp(ui, server)
