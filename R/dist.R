@@ -68,10 +68,12 @@ DIST_SPECS <- list(
 DIST_HELP <- list(
   flat = list(
     description = "An improper flat prior (no preference across all real values). Used as a weak baseline.",
+    example = "Baseline when you truly have no prior preference (use with caution).",
     params = list()
   ),
   normal = list(
     description = "Bell-shaped distribution centered at mu. Sigma controls spread.",
+    example = "Measurement error and average effects.",
     params = list(
       mu = "Center / mean of the distribution.",
       sigma = "Standard deviation (spread)."
@@ -79,6 +81,7 @@ DIST_HELP <- list(
   ),
   laplace = list(
     description = "Sharper peak at zero with heavier tails than normal. Encourages shrinkage (lasso).",
+    example = "Sparse effects: many coefficients near zero.",
     params = list(
       mu = "Center of the distribution.",
       scale = "Scale (larger = wider; smaller = stronger shrinkage)."
@@ -86,6 +89,7 @@ DIST_HELP <- list(
   ),
   student_t = list(
     description = "Like normal but with heavier tails for robustness.",
+    example = "Robust regression where occasional outliers exist.",
     params = list(
       df = "Degrees of freedom (smaller = heavier tails).",
       mu = "Center / mean.",
@@ -94,6 +98,7 @@ DIST_HELP <- list(
   ),
   cauchy = list(
     description = "Very heavy tails. Allows large effects but can be unstable if too wide.",
+    example = "Weakly informative priors on coefficients or scales.",
     params = list(
       loc = "Center of the distribution.",
       scale = "Scale (controls tail heaviness)."
@@ -101,12 +106,14 @@ DIST_HELP <- list(
   ),
   exponential = list(
     description = "Positive-only distribution for rates or scales.",
+    example = "Time between events; simple priors on scale parameters.",
     params = list(
       rate = "Rate (larger = more mass near 0)."
     )
   ),
   gamma = list(
     description = "Positive-only distribution for scales or shapes.",
+    example = "Waiting times, positive rates, or dispersion parameters.",
     params = list(
       shape = "Shape (controls skew and peak).",
       rate = "Rate (inverse scale)."
@@ -114,6 +121,7 @@ DIST_HELP <- list(
   ),
   lognormal = list(
     description = "Positive-only with multiplicative variability; log of values is normal.",
+    example = "Incomes, reaction times, or multiplicative growth.",
     params = list(
       meanlog = "Mean on the log scale.",
       sdlog = "SD on the log scale."
@@ -121,6 +129,7 @@ DIST_HELP <- list(
   ),
   inv_gamma = list(
     description = "Positive-only; commonly used for variance/scale parameters.",
+    example = "Variance or dispersion parameters in older Bayesian models.",
     params = list(
       shape = "Shape parameter.",
       rate = "Rate (inverse scale)."
@@ -128,6 +137,7 @@ DIST_HELP <- list(
   ),
   horseshoe = list(
     description = "Strong shrinkage for most coefficients while allowing a few large effects.",
+    example = "Sparse signals with a few strong predictors.",
     params = list(
       tau = "Global shrinkage (smaller = stronger overall shrinkage).",
       lambda_scale = "Scale for local shrinkage (controls how easily large effects escape)."
@@ -135,12 +145,14 @@ DIST_HELP <- list(
   ),
   lkj_corr = list(
     description = "Prior for correlation. eta = 1 is uniform; larger values favor correlations near 0.",
+    example = "Correlations among group-level effects in multilevel models.",
     params = list(
       eta = "Shape parameter (higher = stronger pull toward zero correlation)."
     )
   ),
   half_student_t = list(
     description = "Positive-only Student t; used for scale parameters with heavy tails.",
+    example = "Standard deviations with heavy tails.",
     params = list(
       df = "Degrees of freedom.",
       sigma = "Scale."
@@ -148,18 +160,21 @@ DIST_HELP <- list(
   ),
   half_normal = list(
     description = "Positive-only normal; useful for standard deviations.",
+    example = "Standard deviations and other positive scales.",
     params = list(
       sigma = "Scale (SD of the underlying normal)."
     )
   ),
   half_cauchy = list(
     description = "Positive-only Cauchy; very heavy tails for scale parameters.",
+    example = "Scale parameters when you want very weak regularization.",
     params = list(
       scale = "Scale (controls tail heaviness)."
     )
   ),
   uniform = list(
     description = "All values between min and max are equally likely.",
+    example = "Bounded parameters like correlations or probabilities (with care).",
     params = list(
       min = "Lower bound.",
       max = "Upper bound."

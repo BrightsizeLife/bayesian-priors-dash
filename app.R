@@ -11,6 +11,7 @@ source("R/modules.R")
 source("R/prior_strength.R")
 source("R/prior_strength_tab.R")
 source("R/help_ui.R")
+source("R/help_server.R")
 
 app_theme <- bs_theme(
   version = 5,
@@ -42,6 +43,7 @@ server <- function(input, output, session) {
   analysisModuleServer("negbin", "negbin")
   analysisModuleServer("multilevel", "multilevel")
   priorStrengthServer("prior_strength")
+  helpTabServer(output, session)
 }
 
 shinyApp(ui, server)
