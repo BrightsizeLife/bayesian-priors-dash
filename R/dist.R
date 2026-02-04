@@ -81,7 +81,7 @@ DIST_HELP <- list(
   ),
   laplace = list(
     description = "Sharper peak at zero with heavier tails than normal. Encourages shrinkage (lasso).",
-    example = "Sparse effects: many coefficients near zero.",
+    example = "Regression coefficients in Bayesian lasso / sparse models.",
     params = list(
       mu = "Center of the distribution.",
       scale = "Scale (larger = wider; smaller = stronger shrinkage)."
@@ -167,7 +167,7 @@ DIST_HELP <- list(
   ),
   half_cauchy = list(
     description = "Positive-only Cauchy; very heavy tails for scale parameters.",
-    example = "Scale parameters when you want very weak regularization.",
+    example = "Weakly informative prior for scale parameters in hierarchical models.",
     params = list(
       scale = "Scale (controls tail heaviness)."
     )
