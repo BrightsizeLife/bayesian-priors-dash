@@ -2,6 +2,12 @@
 
 source("R/dist.R")
 
+ETA_LIMIT <- 6
+
+cap_eta <- function(eta, limit = ETA_LIMIT) {
+  pmax(pmin(eta, limit), -limit)
+}
+
 sample_prior_draws <- function(prior_state, n) {
   draws <- list()
   for (name in names(prior_state)) {
@@ -47,7 +53,7 @@ simulate_logistic <- function(prior_state, settings) {
   x_rep <- rep(x, times = n_sims)
   intercept_rep <- rep(intercept, each = n_points)
   beta_rep <- rep(beta, each = n_points)
-  eta <- intercept_rep + beta_rep * x_rep
+  eta <- cap_eta(intercept_rep + beta_rep * x_rep)
   p <- stats::plogis(eta)
 
   data.frame(
@@ -69,7 +75,7 @@ simulate_poisson <- function(prior_state, settings) {
   x_rep <- rep(x, times = n_sims)
   intercept_rep <- rep(intercept, each = n_points)
   beta_rep <- rep(beta, each = n_points)
-  eta <- intercept_rep + beta_rep * x_rep
+  eta <- cap_eta(intercept_rep + beta_rep * x_rep)
   mu <- exp(eta)
 
   data.frame(
@@ -91,7 +97,7 @@ simulate_gamma <- function(prior_state, settings) {
   x_rep <- rep(x, times = n_sims)
   intercept_rep <- rep(intercept, each = n_points)
   beta_rep <- rep(beta, each = n_points)
-  eta <- intercept_rep + beta_rep * x_rep
+  eta <- cap_eta(intercept_rep + beta_rep * x_rep)
   mu <- exp(eta)
 
   data.frame(
@@ -113,7 +119,7 @@ simulate_negbin <- function(prior_state, settings) {
   x_rep <- rep(x, times = n_sims)
   intercept_rep <- rep(intercept, each = n_points)
   beta_rep <- rep(beta, each = n_points)
-  eta <- intercept_rep + beta_rep * x_rep
+  eta <- cap_eta(intercept_rep + beta_rep * x_rep)
   mu <- exp(eta)
 
   data.frame(
@@ -189,4 +195,3 @@ simulate_analysis <- function(analysis_key, prior_state, settings) {
   }
   stop("Unknown analysis type: ", analysis_key)
 }
-

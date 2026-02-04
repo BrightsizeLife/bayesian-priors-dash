@@ -14,6 +14,13 @@ helpTabUI <- function() {
       )
     })
 
+    source_rows <- list()
+    if (!is.null(help$sources) && length(help$sources) > 0) {
+      source_rows <- lapply(help$sources, function(src) {
+        tags$li(tags$a(href = src$url, target = "_blank", src$label))
+      })
+    }
+
     bslib::card(
       class = "soft-card help-card",
       bslib::card_header(spec$label),
@@ -28,6 +35,13 @@ helpTabUI <- function() {
       },
       if (length(param_rows) > 0) {
         div(class = "help-params", param_rows)
+      },
+      if (length(source_rows) > 0) {
+        div(
+          class = "help-sources",
+          div(class = "help-sources-label", "Sources"),
+          tags$ul(class = "help-sources-list", source_rows)
+        )
       }
     )
   })

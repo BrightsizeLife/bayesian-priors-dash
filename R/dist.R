@@ -69,11 +69,23 @@ DIST_HELP <- list(
   flat = list(
     description = "An improper flat prior (no preference across all real values). Used as a weak baseline.",
     example = "Baseline when you truly have no prior preference (use with caution).",
+    sources = list(
+      list(
+        label = "SAS/STAT: Improper priors",
+        url = "https://support.sas.com/documentation/cdl/en/statug/63033/HTML/default/statug_introbayes_sect004.htm"
+      )
+    ),
     params = list()
   ),
   normal = list(
     description = "Bell-shaped distribution centered at mu. Sigma controls spread.",
     example = "Measurement error and average effects.",
+    sources = list(
+      list(
+        label = "NIST e-Handbook: Normal distribution",
+        url = "https://itl.nist.gov/div898/handbook/eda/section3/eda3661.htm"
+      )
+    ),
     params = list(
       mu = "Center / mean of the distribution.",
       sigma = "Standard deviation (spread)."
@@ -82,6 +94,16 @@ DIST_HELP <- list(
   laplace = list(
     description = "Sharper peak at zero with heavier tails than normal. Encourages shrinkage (lasso).",
     example = "Regression coefficients in Bayesian lasso / sparse models.",
+    sources = list(
+      list(
+        label = "Laplace distribution (overview)",
+        url = "https://en.wikipedia.org/wiki/Laplace_distribution"
+      ),
+      list(
+        label = "Bayesian lasso (Laplace prior)",
+        url = "https://link.springer.com/article/10.1007/s42081-023-00213-2"
+      )
+    ),
     params = list(
       mu = "Center of the distribution.",
       scale = "Scale (larger = wider; smaller = stronger shrinkage)."
@@ -90,6 +112,12 @@ DIST_HELP <- list(
   student_t = list(
     description = "Like normal but with heavier tails for robustness.",
     example = "Robust regression where occasional outliers exist.",
+    sources = list(
+      list(
+        label = "Student's t distribution",
+        url = "https://mathworld.wolfram.com/Studentst-Distribution.html"
+      )
+    ),
     params = list(
       df = "Degrees of freedom (smaller = heavier tails).",
       mu = "Center / mean.",
@@ -99,6 +127,12 @@ DIST_HELP <- list(
   cauchy = list(
     description = "Very heavy tails. Allows large effects but can be unstable if too wide.",
     example = "Weakly informative priors on coefficients or scales.",
+    sources = list(
+      list(
+        label = "Cauchy distribution",
+        url = "https://en.wikipedia.org/wiki/Cauchy_distribution"
+      )
+    ),
     params = list(
       loc = "Center of the distribution.",
       scale = "Scale (controls tail heaviness)."
@@ -107,6 +141,12 @@ DIST_HELP <- list(
   exponential = list(
     description = "Positive-only distribution for rates or scales.",
     example = "Time between events; simple priors on scale parameters.",
+    sources = list(
+      list(
+        label = "NIST e-Handbook: Exponential distribution",
+        url = "https://www.itl.nist.gov/div898/handbook/eda/section3/eda3667.htm"
+      )
+    ),
     params = list(
       rate = "Rate (larger = more mass near 0)."
     )
@@ -114,6 +154,12 @@ DIST_HELP <- list(
   gamma = list(
     description = "Positive-only distribution for scales or shapes.",
     example = "Waiting times, positive rates, or dispersion parameters.",
+    sources = list(
+      list(
+        label = "NIST e-Handbook: Gamma distribution",
+        url = "https://www.itl.nist.gov/div898/handbook/eda/section3/eda366b.htm"
+      )
+    ),
     params = list(
       shape = "Shape (controls skew and peak).",
       rate = "Rate (inverse scale)."
@@ -122,6 +168,12 @@ DIST_HELP <- list(
   lognormal = list(
     description = "Positive-only with multiplicative variability; log of values is normal.",
     example = "Incomes, reaction times, or multiplicative growth.",
+    sources = list(
+      list(
+        label = "NIST e-Handbook: Lognormal distribution",
+        url = "https://www.itl.nist.gov/div898/handbook/eda/section3/eda3669.htm"
+      )
+    ),
     params = list(
       meanlog = "Mean on the log scale.",
       sdlog = "SD on the log scale."
@@ -130,6 +182,12 @@ DIST_HELP <- list(
   inv_gamma = list(
     description = "Positive-only; commonly used for variance/scale parameters.",
     example = "Variance or dispersion parameters in older Bayesian models.",
+    sources = list(
+      list(
+        label = "Inverse-gamma distribution",
+        url = "https://en.wikipedia.org/wiki/Inverse-gamma_distribution"
+      )
+    ),
     params = list(
       shape = "Shape parameter.",
       rate = "Rate (inverse scale)."
@@ -138,6 +196,12 @@ DIST_HELP <- list(
   horseshoe = list(
     description = "Strong shrinkage for most coefficients while allowing a few large effects.",
     example = "Sparse signals with a few strong predictors.",
+    sources = list(
+      list(
+        label = "Handling Sparsity via the Horseshoe",
+        url = "https://proceedings.mlr.press/v5/carvalho09a"
+      )
+    ),
     params = list(
       tau = "Global shrinkage (smaller = stronger overall shrinkage).",
       lambda_scale = "Scale for local shrinkage (controls how easily large effects escape)."
@@ -146,6 +210,12 @@ DIST_HELP <- list(
   lkj_corr = list(
     description = "Prior for correlation. eta = 1 is uniform; larger values favor correlations near 0.",
     example = "Correlations among group-level effects in multilevel models.",
+    sources = list(
+      list(
+        label = "Stan User's Guide: LKJ prior",
+        url = "https://mc-stan.org/docs/2_23/stan-users-guide/multivariate-hierarchical-priors-section.html"
+      )
+    ),
     params = list(
       eta = "Shape parameter (higher = stronger pull toward zero correlation)."
     )
@@ -153,6 +223,12 @@ DIST_HELP <- list(
   half_student_t = list(
     description = "Positive-only Student t; used for scale parameters with heavy tails.",
     example = "Standard deviations with heavy tails.",
+    sources = list(
+      list(
+        label = "Student's t distribution",
+        url = "https://mathworld.wolfram.com/Studentst-Distribution.html"
+      )
+    ),
     params = list(
       df = "Degrees of freedom.",
       sigma = "Scale."
@@ -161,6 +237,12 @@ DIST_HELP <- list(
   half_normal = list(
     description = "Positive-only normal; useful for standard deviations.",
     example = "Standard deviations and other positive scales.",
+    sources = list(
+      list(
+        label = "Half-normal distribution",
+        url = "https://en.wikipedia.org/wiki/Half-normal_distribution"
+      )
+    ),
     params = list(
       sigma = "Scale (SD of the underlying normal)."
     )
@@ -168,6 +250,12 @@ DIST_HELP <- list(
   half_cauchy = list(
     description = "Positive-only Cauchy; very heavy tails for scale parameters.",
     example = "Weakly informative prior for scale parameters in hierarchical models.",
+    sources = list(
+      list(
+        label = "Stan User's Guide: half-Cauchy recommendation",
+        url = "https://mc-stan.org/docs/2_23/stan-users-guide/multivariate-hierarchical-priors-section.html"
+      )
+    ),
     params = list(
       scale = "Scale (controls tail heaviness)."
     )
@@ -175,6 +263,12 @@ DIST_HELP <- list(
   uniform = list(
     description = "All values between min and max are equally likely.",
     example = "Bounded parameters like correlations or probabilities (with care).",
+    sources = list(
+      list(
+        label = "Britannica: Uniform distribution",
+        url = "https://www.britannica.com/topic/uniform-distribution-statistics"
+      )
+    ),
     params = list(
       min = "Lower bound.",
       max = "Upper bound."
