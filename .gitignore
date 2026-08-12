@@ -1,2 +1,16 @@
+# R session artifacts
+.Rhistory
+.Rapp.history
+.RData
+.Ruserdata
+
+# RStudio
+.Rproj.user/
+
+# Deployment
+rsconnect/
+
+# OS
 .DS_Store
 ._*
+Thumbs.db

@@ -2,16 +2,24 @@
 
 library(ggplot2)
 
-plot_implied <- function(analysis_key, data) {
-  base_theme <- theme_minimal(base_size = 12) +
+# Shared dark theme matching the app's bslib palette.
+theme_dash <- function(base_size = 12) {
+  theme_minimal(base_size = base_size) +
     theme(
       panel.background = element_rect(fill = "#141824", color = NA),
       plot.background = element_rect(fill = "#141824", color = NA),
       panel.grid.minor = element_blank(),
       panel.grid.major = element_line(color = "#2a3140"),
       axis.text = element_text(color = "#cbd5e1"),
-      axis.title = element_text(color = "#e6e8f0")
+      axis.title = element_text(color = "#e6e8f0"),
+      plot.subtitle = element_text(color = "#9aa4b5"),
+      strip.background = element_rect(fill = "#1a2030", color = "#293041"),
+      strip.text = element_text(color = "#e6e8f0")
     )
+}
+
+plot_implied <- function(analysis_key, data) {
+  base_theme <- theme_dash()
 
   if (analysis_key %in% c("logistic", "poisson", "gamma", "negbin")) {
     y_label <- if (analysis_key == "logistic") "Implied probability" else "Implied mean"
@@ -39,15 +47,5 @@ plot_prior_density <- function(draws_df) {
     geom_density(color = "#7dd3fc", fill = "#7dd3fc", alpha = 0.2, linewidth = 0.6) +
     facet_wrap(~ parameter, scales = "free") +
     labs(x = "Value", y = "Density") +
-    theme_minimal(base_size = 12) +
-    theme(
-      panel.background = element_rect(fill = "#141824", color = NA),
-      plot.background = element_rect(fill = "#141824", color = NA),
-      panel.grid.minor = element_blank(),
-      panel.grid.major = element_line(color = "#2a3140"),
-      axis.text = element_text(color = "#cbd5e1"),
-      axis.title = element_text(color = "#e6e8f0"),
-      strip.background = element_rect(fill = "#1a2030", color = "#293041"),
-      strip.text = element_text(color = "#e6e8f0")
-    )
+    theme_dash()
 }

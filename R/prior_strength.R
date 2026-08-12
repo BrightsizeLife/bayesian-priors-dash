@@ -103,8 +103,8 @@ prior_strength_weights <- function(likelihood, prior_params, likelihood_params, 
   spec <- prior_strength_spec(likelihood)
   prior_params <- ensure_named_params(prior_params, spec$prior_params, "Prior")
   likelihood_params <- ensure_named_params(likelihood_params, spec$likelihood_params, "Likelihood")
-  ensure_positive_params(prior_params, spec$positive_params, "Prior")
-  ensure_positive_params(likelihood_params, spec$positive_params, "Likelihood")
+  ensure_positive_params(prior_params, intersect(spec$positive_params, spec$prior_params), "Prior")
+  ensure_positive_params(likelihood_params, intersect(spec$positive_params, spec$likelihood_params), "Likelihood")
   ensure_positive_n(n)
 
   weights <- spec$weight_fn(prior_params, likelihood_params, n)
@@ -121,8 +121,8 @@ prior_strength_thresholds <- function(likelihood, prior_params, likelihood_param
   spec <- prior_strength_spec(likelihood)
   prior_params <- ensure_named_params(prior_params, spec$prior_params, "Prior")
   likelihood_params <- ensure_named_params(likelihood_params, spec$likelihood_params, "Likelihood")
-  ensure_positive_params(prior_params, spec$positive_params, "Prior")
-  ensure_positive_params(likelihood_params, spec$positive_params, "Likelihood")
+  ensure_positive_params(prior_params, intersect(spec$positive_params, spec$prior_params), "Prior")
+  ensure_positive_params(likelihood_params, intersect(spec$positive_params, spec$likelihood_params), "Likelihood")
 
   n_equal <- spec$n_equal_fn(prior_params, likelihood_params)
   if (n_is_integer) {

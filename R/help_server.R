@@ -28,12 +28,8 @@ plot_dist_preview <- function(dist) {
   ggplot(df, aes(x = x, y = y)) +
     geom_area(fill = "#7dd3fc", alpha = 0.25) +
     geom_line(color = "#7dd3fc", linewidth = 0.7) +
-    theme_minimal(base_size = 11) +
+    theme_dash(base_size = 11) +
     theme(
-      panel.background = element_rect(fill = "#141824", color = NA),
-      plot.background = element_rect(fill = "#141824", color = NA),
-      panel.grid.minor = element_blank(),
-      panel.grid.major = element_line(color = "#2a3140"),
       axis.text = element_text(color = "#cbd5e1", size = 8),
       axis.title = element_blank()
     )
