@@ -1,0 +1,390 @@
+/* Bayesian Priors Explorer — dark theme matching the Shiny app's palette. */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-color: #0f1117;
+  color: #e6e8f0;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+/* --- navbar / tabs --------------------------------------------------------- */
+
+.navbar {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  padding: 0.6rem 1rem;
+  background-color: #0f1117;
+  border-bottom: 1px solid #1f2533;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.navbar-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+#tab-nav {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+#tab-nav button {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #e6e8f0;
+  font: inherit;
+  font-size: 0.92rem;
+  padding: 0.45rem 0.7rem;
+  cursor: pointer;
+}
+
+#tab-nav button:hover {
+  color: #7dd3fc;
+}
+
+#tab-nav button.active {
+  color: #7dd3fc;
+  border-bottom-color: #7dd3fc;
+}
+
+#tab-nav button:focus-visible,
+.run-button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+a:focus-visible {
+  outline: 2px solid #7dd3fc;
+  outline-offset: 2px;
+}
+
+/* --- layout ---------------------------------------------------------------- */
+
+main {
+  padding: 1rem;
+}
+
+.tab-layout {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.sidebar-panel {
+  border-right: 1px solid #1f2533;
+  padding-right: 0.75rem;
+}
+
+.sidebar-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.plot-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1rem;
+}
+
+@media (max-width: 900px) {
+  .tab-layout {
+    grid-template-columns: 1fr;
+  }
+  .sidebar-panel {
+    border-right: none;
+    padding-right: 0;
+  }
+}
+
+/* --- cards ------------------------------------------------------------------ */
+
+.soft-card {
+  background-color: #141824;
+  border: 1px solid #293041;
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.soft-card[hidden] {
+  display: none;
+}
+
+.card-header {
+  background-color: #141824;
+  border-bottom: 1px solid #293041;
+  color: #e6e8f0;
+  font-weight: 600;
+  font-size: 0.92rem;
+  padding: 0.55rem 0.8rem;
+}
+
+.card-body {
+  padding: 0.7rem 0.8rem;
+}
+
+.model-purpose {
+  color: #cbd5e1;
+  font-size: 0.85rem;
+}
+
+/* --- inputs ------------------------------------------------------------------ */
+
+.field {
+  margin-bottom: 0.6rem;
+}
+
+.field label {
+  display: block;
+  font-size: 0.82rem;
+  color: #a4adbd;
+  margin-bottom: 0.2rem;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  background-color: #0f1117;
+  color: #e6e8f0;
+  border: 1px solid #2f374a;
+  border-radius: 6px;
+  padding: 0.4rem 0.5rem;
+  font: inherit;
+  font-size: 0.88rem;
+}
+
+.field input:focus,
+.field select:focus {
+  border-color: #7dd3fc;
+  box-shadow: 0 0 0 0.2rem rgba(125, 211, 252, 0.25);
+  outline: none;
+}
+
+.run-button {
+  background-color: #7dd3fc;
+  border: 1px solid #7dd3fc;
+  border-radius: 6px;
+  color: #0f1117;
+  font: inherit;
+  font-weight: 600;
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+}
+
+.run-button:hover,
+.run-button:focus {
+  background-color: #5bc6f7;
+  border-color: #5bc6f7;
+}
+
+/* --- notes ------------------------------------------------------------------- */
+
+.muted-note {
+  color: #a4adbd;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.warning-note {
+  color: #f8d477;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.noscript-note {
+  padding: 2rem;
+  text-align: center;
+  color: #f8d477;
+}
+
+/* --- charts ------------------------------------------------------------------ */
+
+.chart {
+  display: block;
+  width: 100%;
+  height: 320px;
+}
+
+.chart-tall {
+  height: 360px;
+}
+
+.chart-small {
+  height: 190px;
+}
+
+.chart-preview {
+  height: 140px;
+}
+
+.chart-holder {
+  position: relative;
+}
+
+.chart-tooltip {
+  position: absolute;
+  background: #1a2030;
+  border: 1px solid #293041;
+  border-radius: 6px;
+  color: #e6e8f0;
+  font-size: 0.78rem;
+  padding: 0.3rem 0.5rem;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 5;
+}
+
+.density-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.6rem;
+}
+
+.density-facet .facet-label {
+  background-color: #1a2030;
+  border: 1px solid #293041;
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  color: #e6e8f0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  text-align: center;
+}
+
+/* --- tables ------------------------------------------------------------------ */
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.summary-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.84rem;
+  color: #e6e8f0;
+}
+
+.summary-table th,
+.summary-table td {
+  border-top: 1px solid #293041;
+  padding: 0.4rem 0.6rem;
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.summary-table th {
+  border-top: none;
+  border-bottom: 1px solid #293041;
+  color: #a4adbd;
+  font-weight: 600;
+}
+
+.summary-table th:first-child,
+.summary-table td:first-child {
+  text-align: left;
+}
+
+/* --- help tab ---------------------------------------------------------------- */
+
+.help-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  padding: 0.5rem 0.25rem;
+}
+
+.help-card .card-header {
+  font-size: 0.95rem;
+}
+
+.help-text {
+  color: #cbd5e1;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+.help-example {
+  margin-top: 0.4rem;
+  display: flex;
+  gap: 0.35rem;
+  align-items: baseline;
+}
+
+.help-example-label {
+  color: #7dd3fc;
+  font-weight: 600;
+  font-size: 0.82rem;
+}
+
+.help-example-text {
+  color: #cbd5e1;
+  font-size: 0.82rem;
+}
+
+.help-params {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.help-param {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+}
+
+.help-param-name {
+  color: #e6e8f0;
+  font-weight: 600;
+  min-width: 90px;
+  font-size: 0.82rem;
+}
+
+.help-param-desc {
+  color: #b6c0d2;
+  font-size: 0.82rem;
+}
+
+.help-sources {
+  margin-top: 0.5rem;
+}
+
+.help-sources-label {
+  color: #7dd3fc;
+  font-weight: 600;
+  font-size: 0.78rem;
+  margin-bottom: 0.2rem;
+}
+
+.help-sources-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  list-style: disc;
+}
+
+.help-sources-list li {
+  margin-bottom: 0.2rem;
+  font-size: 0.78rem;
+}
+
+.help-sources-list a {
+  color: #cbd5e1;
+}
