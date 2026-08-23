@@ -159,7 +159,6 @@ priorStrengthServer <- function(id) {
           prior_params <- list(alpha = safe_value(input$alpha, 2), beta = safe_value(input$beta, 1))
         }
         like_params <- list()
-        w_prior <- prior_strength_weights(likelihood, prior_params, like_params, n = n_values[1])$prior_weight
         prior_share <- vapply(n_values, function(n_val) {
           weights <- prior_strength_weights(likelihood, prior_params, like_params, n = n_val)
           weights$prior_share
@@ -184,7 +183,7 @@ priorStrengthServer <- function(id) {
         geom_hline(yintercept = 0.5, linetype = "dashed", color = "gray50") +
         scale_y_continuous(labels = scales::percent) +
         labs(x = "n", y = "Prior share", subtitle = "< 50% = likelihood dominates") +
-        theme_minimal(base_size = 12)
+        theme_dash()
     })
 
     output$posterior_mean_card <- renderUI({
@@ -208,7 +207,7 @@ priorStrengthServer <- function(id) {
       ggplot(df, aes(x = n, y = posterior_mean)) +
         geom_line(color = "#7dd3fc", linewidth = 0.9) +
         labs(x = "n", y = "Posterior mean") +
-        theme_minimal(base_size = 12)
+        theme_dash()
     })
 
     output$kl_card <- renderUI({
@@ -229,7 +228,7 @@ priorStrengthServer <- function(id) {
         geom_line(color = "#7dd3fc", linewidth = 0.9) +
         scale_y_log10() +
         labs(x = "n", y = "KL (log scale)") +
-        theme_minimal(base_size = 12)
+        theme_dash()
     })
 
     output$summary_table <- renderTable({

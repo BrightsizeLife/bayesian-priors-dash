@@ -17,7 +17,7 @@ helpTabUI <- function() {
     source_rows <- list()
     if (!is.null(help$sources) && length(help$sources) > 0) {
       source_rows <- lapply(help$sources, function(src) {
-        tags$li(tags$a(href = src$url, target = "_blank", src$label))
+        tags$li(tags$a(href = src$url, target = "_blank", rel = "noopener noreferrer", src$label))
       })
     }
 

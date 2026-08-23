@@ -289,10 +289,6 @@ get_dist_help <- function(dist) {
   help
 }
 
-get_all_dist_help <- function() {
-  names(DIST_SPECS)
-}
-
 resolve_params <- function(dist, params) {
   spec <- DIST_SPECS[[dist]]
   if (is.null(spec)) {

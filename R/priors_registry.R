@@ -135,8 +135,6 @@ PRIOR_TEMPLATES <- list(
   )
 )
 
-PRESET_NAMES <- c("custom", "brms", "rstanarm")
-
 build_custom_defaults <- function(template) {
   lapply(template$parameters, function(param) {
     list(dist = param$default$dist, params = param$default$params)
